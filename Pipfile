@@ -8,6 +8,8 @@ pre-commit = "*"
 dvc = "*"
 dvc-gdrive = "*"
 ipykernel = "*"
+numpy = "*"
+pandas = "*"
 
 [dev-packages]
 
