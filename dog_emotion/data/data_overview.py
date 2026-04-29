@@ -19,7 +19,7 @@ the same folder structure and just adds .jpg files.
 """
 
 total_count = 0
-base_path = Path("../data/images")
+base_path = Path("../../data/images")
 for emotion_dir in base_path.iterdir():
     if emotion_dir.is_dir():
         count = len(list(emotion_dir.rglob("*.jpg")))
