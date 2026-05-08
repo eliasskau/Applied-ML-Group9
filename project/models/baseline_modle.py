@@ -81,3 +81,19 @@ print(classification_report(Y_val, Y_val_pred, target_names=classes))
 val_cm = confusion_matrix(Y_val, Y_val_pred)
 print("Validation confision matrix:")
 print(val_cm)
+
+#testing
+
+Y_test_pred = model.predict(X_test_pca)
+
+test_accuracy = accuracy_score(Y_test, Y_test_pred)
+test_f1 = f1_score(Y_test, Y_test_pred, average="macro")
+
+print("Test accuracy:", test_accuracy)
+print("Test macro F1:", test_f1)
+
+print(classification_report(Y_test, Y_test_pred, target_names=classes))
+
+test_cm = confusion_matrix(Y_test, Y_test_pred)
+print("Test confusion matrix:")
+print(test_cm)
