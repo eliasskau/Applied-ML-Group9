@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 # data
 
 DATA_DIR = "data/images"
-IMG_SIZE = 64
+IMG_SIZE = 384
 classes = ["alert", "angry", "frown", "happy", "relax"]
 
 transform = transforms.Compose(
@@ -26,3 +26,10 @@ train_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train
 
 trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=2)
 testloader = DataLoader(test_dataset, batch_size=4, shuffle=False, num_workers=2)
+
+#model architecture
+
+class Net(nn.Module):
+    def __init__(self):
+        super(Net,self).__init__()
+
