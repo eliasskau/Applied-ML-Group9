@@ -14,6 +14,8 @@ matplotlib = "*"
 tensorflow = "*"
 scikit-learn = "*"
 seaborn = "*"
+torch = "*"
+torchvision = "*"
 
 [dev-packages]
 
