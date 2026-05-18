@@ -3,7 +3,7 @@ to use:
     from dog_emotion.data.preprocessing import get_dataloaders, CLASSES
 
     train_loader, val_loader, test_loader = get_dataloaders(
-        data_dir="data/images",
+        data_dir="data/images",git 
         img_size=224,
         batch_size=32,
         num_workers=2,
@@ -59,7 +59,6 @@ class DogEmotionDataset(Dataset):
 
     @property
     def labels(self) -> list[int]:
-        """All labels in order — used for stratified splitting."""
         return [label for _, label in self.samples]
 
 def _build_transforms(img_size: int, augment: bool) -> transforms.Compose:
