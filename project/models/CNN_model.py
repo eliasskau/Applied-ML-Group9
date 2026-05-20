@@ -12,6 +12,13 @@ from torch.utils.data import DataLoader
 DATA_DIR = "data/images"
 IMG_SIZE = 384
 classes = ["alert", "angry", "frown", "happy", "relax"]
+num_classes = len(classes)
+
+
+#hyper param
+learning_rate= 0.001
+num_epochs = 10
+batch_size = 32
 
 transform = transforms.Compose(
     [transforms.ToTensor(),
@@ -24,12 +31,37 @@ train_size = int(0.8 * len(full_dataset))
 test_size = len(full_dataset) - train_size
 train_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train_size, test_size])
 
-trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=2)
-testloader = DataLoader(test_dataset, batch_size=4, shuffle=False, num_workers=2)
+train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=2)
+test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False, num_workers=2)
 
 #model architecture
+class Dog_Model(nn.Module):
+    def __init__(self,num_classes):
+        super().__init__()
 
-class Net(nn.Module):
-    def __init__(self):
-        super(Net,self).__init__()
+        self.conv1 = nn.Conv2d(3,32,3)
+        self.conv2 = nn.Conv2d(32,64,3)
+        self.conv3 = nn.Conv2d(64,128,3)
 
+        self.pool = nn.MaxPool2d(2,2)
+
+        self.conv4 = nn.Conv2d(128,256,3)
+        self.conv5 = nn.Conv2d(256,512,3)
+
+        self.fc1 = nn.Linear(512 * 92 * 92, 256)
+        self.fc2 = nn.Linear(256, num_classes)
+
+        self.dropout = nn.Dropout(0.25)
+
+    def forward(self,x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = F.relu(self.conv3(x))
+        x = self.pool(F.relu(self.conv4(x)))
+        x = F.relu(self.conv5(x))
+        x =self.pool(x)
+        x = x.view(x.size(0),-1)
+        x= F.relu(self.fc1(x))
+        x = self.dropout(x)
+        x = self.fc2(x)
+        return x
