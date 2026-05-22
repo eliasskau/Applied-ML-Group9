@@ -24,7 +24,17 @@ batch_size = 32
 device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 print(f"Using device: {device}")
 
-transform = transforms.Compose([
+train_transform = transforms.Compose([
+    transforms.Resize((IMG_SIZE, IMG_SIZE)),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomRotation(15),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                         std=[0.229, 0.224, 0.225])
+])
+
+test_transform = transforms.Compose([
     transforms.Resize((IMG_SIZE, IMG_SIZE)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406],
@@ -32,7 +42,7 @@ transform = transforms.Compose([
 ])
 
 if __name__ == '__main__':
-    full_dataset = ImageFolder(root=DATA_DIR, transform=transform)
+    full_dataset = ImageFolder(root=DATA_DIR, transform=train_transform)
 
     train_size = int(0.8 * len(full_dataset))
     test_size = len(full_dataset) - train_size
