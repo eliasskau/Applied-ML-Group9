@@ -44,7 +44,7 @@ if __name__ == '__main__':
     model = Dog_Model(num_classes).to(device)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 
     for epoch in range(num_epochs):
