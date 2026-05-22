@@ -45,10 +45,16 @@ if __name__ == '__main__':
     full_dataset = ImageFolder(root=DATA_DIR, transform=train_transform)
 
     train_size = int(0.8 * len(full_dataset))
-    test_size = len(full_dataset) - train_size
-    train_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train_size, test_size])
+    val_size = int(0.1 * len(full_dataset))
+    test_size = len(full_dataset) - train_size - val_size
+    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train_size, val_size, test_size])
+
+    # Apply test transform (no augmentation) to val and test sets
+    val_dataset.dataset.transform = test_transform
+    test_dataset.dataset.transform = test_transform
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
     model = Dog_Model(num_classes).to(device)
