@@ -22,6 +22,7 @@ num_epochs = 30
 batch_size = 32
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+torch.backends.cudnn.enabled = False
 print(f"Using device: {device}")
 
 train_transform = transforms.Compose([
