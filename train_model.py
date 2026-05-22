@@ -5,6 +5,7 @@ import torchvision
 import torchvision.transforms as transforms
 import torch.nn.functional as F
 from torchvision.datasets import ImageFolder
+from project.models.CNN_model import Dog_Model
 from torch.utils.data import DataLoader
 
 # data
@@ -32,8 +33,8 @@ train_size = int(0.8 * len(full_dataset))
 test_size = len(full_dataset) - train_size
 train_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train_size, test_size])
 
-train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=2)
-test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False, num_workers=2)
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=2)
+test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
 
 model = Dog_Model(num_classes)
 
@@ -53,9 +54,20 @@ for epoch in range(num_epochs):
         optimizer.step()
 
         running_loss += loss.item()
-        if i % 2000 == 1999:
-            print('[%d, %5d] loss: %.3f' %
-                  (epoch + 1, i + 1, running_loss / 2000))
+        if i % 50 == 49:
+            avg_loss = running_loss / 50
+            print(f'Avg loss over last 50 batches: {avg_loss:.3f}')
             running_loss = 0.0
 
-print('Finished Training')
+    model.eval()
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for inputs, labels in test_loader:
+            outputs = model(inputs)
+            _, predicted = torch.max(outputs, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+    accuracy = 100 * correct / total
+    print(f'Test accuracy: {accuracy:.2f}%\n')
