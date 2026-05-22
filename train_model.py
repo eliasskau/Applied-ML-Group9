@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 # data
 
 DATA_DIR = "data/images"
-IMG_SIZE = 384
+IMG_SIZE = 224
 classes = ["alert", "angry", "frown", "happy", "relax"]
 num_classes = len(classes)
 
