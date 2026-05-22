@@ -7,6 +7,15 @@ name = "pypi"
 pre-commit = "*"
 dvc = "*"
 dvc-gdrive = "*"
+ipykernel = "*"
+numpy = "*"
+pandas = "*"
+matplotlib = "*"
+tensorflow = "*"
+scikit-learn = "*"
+seaborn = "*"
+torch = "*"
+torchvision = "*"
 
 [dev-packages]
 
