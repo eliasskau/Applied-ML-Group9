@@ -14,26 +14,6 @@ IMG_SIZE = 384
 classes = ["alert", "angry", "frown", "happy", "relax"]
 num_classes = len(classes)
 
-
-#hyper param
-learning_rate= 0.001
-num_epochs = 10
-batch_size = 32
-
-transform = transforms.Compose(
-    [transforms.ToTensor(),
-     transforms.Resize((IMG_SIZE,IMG_SIZE)),
-     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-
-full_dataset = ImageFolder(root=DATA_DIR, transform=transform)
-
-train_size = int(0.8 * len(full_dataset))
-test_size = len(full_dataset) - train_size
-train_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train_size, test_size])
-
-train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, num_workers=2)
-test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False, num_workers=2)
-
 #model architecture
 class Dog_Model(nn.Module):
     def __init__(self,num_classes):
@@ -48,7 +28,7 @@ class Dog_Model(nn.Module):
         self.conv4 = nn.Conv2d(128,256,3)
         self.conv5 = nn.Conv2d(256,512,3)
 
-        self.fc1 = nn.Linear(512 * 92 * 92, 256)
+        self.fc1 = nn.Linear(512 * 21 * 21, 256)
         self.fc2 = nn.Linear(256, num_classes)
 
         self.dropout = nn.Dropout(0.25)
@@ -66,28 +46,3 @@ class Dog_Model(nn.Module):
         x = self.fc2(x)
         return x
 
-
-model = Dog_Model(num_classes)
-
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-
-for epoch in range(num_epochs):
-    running_loss = 0.0
-    for i, data in enumerate(train_loader, 0):
-        inputs, labels = data
-
-        optimizer.zero_grad()
-
-        outputs = model(inputs)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-
-        running_loss += loss.item()
-        if i % 2000 == 1999:
-            print('[%d, %5d] loss: %.3f' %
-                  (epoch + 1, i + 1, running_loss / 2000))
-            running_loss = 0.0
-
-print('Finished Training')
