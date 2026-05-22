@@ -18,7 +18,7 @@ num_classes = len(classes)
 
 #hyper param
 learning_rate= 0.001
-num_epochs = 10
+num_epochs = 30
 batch_size = 32
 
 device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
@@ -61,6 +61,7 @@ if __name__ == '__main__':
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=3, verbose=True)
 
 
     for epoch in range(num_epochs):
@@ -87,15 +88,31 @@ if __name__ == '__main__':
         correct = 0
         total = 0
         with torch.no_grad():
-            for inputs, labels in test_loader:
+            for inputs, labels in val_loader:
                 inputs, labels = inputs.to(device), labels.to(device)
                 outputs = model(inputs)
                 _, predicted = torch.max(outputs, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
 
-        accuracy = 100 * correct / total
-        print(f'Test accuracy: {accuracy:.2f}%\n')
+        val_accuracy = 100 * correct / total
+        scheduler.step(val_accuracy)
+        print(f'Epoch [{epoch+1}/{num_epochs}] Val accuracy: {val_accuracy:.2f}%\n')
+
+    # Final evaluation on held-out test set
+    model.eval()
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for inputs, labels in test_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            _, predicted = torch.max(outputs, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+    test_accuracy = 100 * correct / total
+    print(f'Final Test accuracy: {test_accuracy:.2f}%')
 
     torch.save(model.state_dict(), 'models/dog_model.pth')
     print(f'Model saved to models/dog_model.pth')
