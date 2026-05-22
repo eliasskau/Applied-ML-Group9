@@ -71,3 +71,6 @@ for epoch in range(num_epochs):
 
     accuracy = 100 * correct / total
     print(f'Test accuracy: {accuracy:.2f}%\n')
+
+torch.save(model.state_dict(), 'models/dog_model.pth')
+print(f'Model saved to models/dog_model.pth')
