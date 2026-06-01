@@ -7,3 +7,4 @@ venv/
 example.ipynb
 .pth
 .pkl
+models/
