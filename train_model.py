@@ -115,5 +115,5 @@ if __name__ == '__main__':
     test_accuracy = 100 * correct / total
     print(f'Final Test accuracy: {test_accuracy:.2f}%')
 
-    torch.save(model.state_dict(), 'models/dog_model.pth')
+    torch.save(model.state_dict(), 'models/CNN_dog_model.pth')
     print(f'Model saved to models/dog_model.pth')
