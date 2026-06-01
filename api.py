@@ -23,7 +23,7 @@ from PIL import Image, UnidentifiedImageError
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
-MODEL_PATH  = "best_distilled_student.pth"
+MODEL_PATH  = "models/best_distilled_student.pth"
 IMG_SIZE    = 224
 NUM_CLASSES = 4
 CLASSES     = ["angry", "happy", "relaxed", "sad"]
