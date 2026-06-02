@@ -16,10 +16,12 @@ classes = ["alert", "angry", "frown", "happy", "relax"]
 num_classes = len(classes)
 
 
-#hyper param
+# hyper param
 learning_rate= 0.001
 num_epochs = 50
 batch_size = 32
+weight_decay = 1e-4   # L2 regularization
+l1_lambda = 1e-5      # L1 regularization
 
 # early stopping
 PATIENCE = 7
@@ -64,7 +66,8 @@ if __name__ == '__main__':
     model = Dog_Model(num_classes).to(device)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    # weight_decay adds L2 penalty via the optimizer
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=3)
 
     best_val_acc = 0.0
@@ -81,6 +84,11 @@ if __name__ == '__main__':
 
             outputs = model(inputs)
             loss = criterion(outputs, labels)
+
+            # L1 penalty on all weights
+            l1_penalty = sum(p.abs().sum() for p in model.parameters())
+            loss = loss + l1_lambda * l1_penalty
+
             loss.backward()
             optimizer.step()
 
