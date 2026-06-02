@@ -4,6 +4,7 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
 from torchvision.datasets import ImageFolder
 from dog_emotion.models.CNN_model import Dog_Model
 from torch.utils.data import DataLoader
@@ -72,10 +73,13 @@ if __name__ == '__main__':
 
     best_val_acc = 0.0
     epochs_no_improve = 0
+    history = {"train_acc": [], "val_acc": []}
 
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
+        train_correct = 0
+        train_total = 0
         for i, data in enumerate(train_loader, 0):
             inputs, labels = data
             inputs, labels = inputs.to(device), labels.to(device)
@@ -93,10 +97,15 @@ if __name__ == '__main__':
             optimizer.step()
 
             running_loss += loss.item()
+            _, predicted = torch.max(outputs, 1)
+            train_correct += (predicted == labels).sum().item()
+            train_total += labels.size(0)
             if i % 50 == 49:
                 avg_loss = running_loss / 50
                 print(f'Avg loss over last 50 batches: {avg_loss:.3f}')
                 running_loss = 0.0
+
+        train_accuracy = 100 * train_correct / train_total
 
         model.eval()
         correct = 0
@@ -111,7 +120,9 @@ if __name__ == '__main__':
 
         val_accuracy = 100 * correct / total
         scheduler.step(val_accuracy)
-        print(f'Epoch [{epoch+1}/{num_epochs}] Val accuracy: {val_accuracy:.2f}%')
+        history["train_acc"].append(train_accuracy)
+        history["val_acc"].append(val_accuracy)
+        print(f'Epoch [{epoch+1}/{num_epochs}] Train acc: {train_accuracy:.2f}%  Val acc: {val_accuracy:.2f}%')
 
         # save best weights
         if val_accuracy > best_val_acc:
@@ -142,3 +153,17 @@ if __name__ == '__main__':
 
     test_accuracy = 100 * correct / total
     print(f'Final Test accuracy: {test_accuracy:.2f}%')
+
+    # plot train vs val accuracy
+    epochs_ran = range(1, len(history["train_acc"]) + 1)
+    plt.figure(figsize=(8, 5))
+    plt.plot(epochs_ran, history["train_acc"], label="train accuracy")
+    plt.plot(epochs_ran, history["val_acc"], label="val accuracy")
+    plt.xlabel("epoch")
+    plt.ylabel("accuracy (%)")
+    plt.title("train vs val accuracy")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig("models/train_val_accuracy.png")
+    plt.show()
+    print("plot saved to models/train_val_accuracy.png")
