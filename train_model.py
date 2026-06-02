@@ -1,3 +1,4 @@
+import copy
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -56,9 +57,14 @@ if __name__ == '__main__':
     test_size = len(full_dataset) - train_size - val_size
     train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train_size, val_size, test_size])
 
-    # Apply test transform (no augmentation) to val and test sets
-    val_dataset.dataset.transform = test_transform
-    test_dataset.dataset.transform = test_transform
+    # Apply test transform (no augmentation) to val and test sets using deepcopy to avoid affecting train
+    val_copy = copy.deepcopy(val_dataset.dataset)
+    val_copy.transform = test_transform
+    val_dataset.dataset = val_copy
+
+    test_copy = copy.deepcopy(test_dataset.dataset)
+    test_copy.transform = test_transform
+    test_dataset.dataset = test_copy
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
@@ -139,7 +145,7 @@ if __name__ == '__main__':
             break
 
     # Final evaluation on held-out test set
-    model.load_state_dict(torch.load('models/best_CNN_dog_model.pth'))
+    model.load_state_dict(torch.load('models/best_CNN_dog_model.pth', weights_only=True))
     model.eval()
     correct = 0
     total = 0
