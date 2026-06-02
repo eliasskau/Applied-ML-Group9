@@ -5,7 +5,7 @@ import torchvision
 import torchvision.transforms as transforms
 import torch.nn.functional as F
 from torchvision.datasets import ImageFolder
-from project.models.CNN_model import Dog_Model
+from dog_emotion.models.CNN_model import Dog_Model
 from torch.utils.data import DataLoader
 
 # data
@@ -18,8 +18,11 @@ num_classes = len(classes)
 
 #hyper param
 learning_rate= 0.001
-num_epochs = 30
+num_epochs = 50
 batch_size = 32
+
+# early stopping
+PATIENCE = 7
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.backends.cudnn.enabled = False
@@ -64,6 +67,8 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=3)
 
+    best_val_acc = 0.0
+    epochs_no_improve = 0
 
     for epoch in range(num_epochs):
         model.train()
@@ -98,9 +103,24 @@ if __name__ == '__main__':
 
         val_accuracy = 100 * correct / total
         scheduler.step(val_accuracy)
-        print(f'Epoch [{epoch+1}/{num_epochs}] Val accuracy: {val_accuracy:.2f}%\n')
+        print(f'Epoch [{epoch+1}/{num_epochs}] Val accuracy: {val_accuracy:.2f}%')
+
+        # save best weights
+        if val_accuracy > best_val_acc:
+            best_val_acc = val_accuracy
+            torch.save(model.state_dict(), 'models/best_CNN_dog_model.pth')
+            print(f'  -> best model saved (val acc: {best_val_acc:.2f}%)')
+            epochs_no_improve = 0
+        else:
+            epochs_no_improve += 1
+            print(f'  -> no improvement ({epochs_no_improve}/{PATIENCE})')
+
+        if epochs_no_improve >= PATIENCE:
+            print(f'Early stopping at epoch {epoch+1}')
+            break
 
     # Final evaluation on held-out test set
+    model.load_state_dict(torch.load('models/best_CNN_dog_model.pth'))
     model.eval()
     correct = 0
     total = 0
@@ -114,6 +134,3 @@ if __name__ == '__main__':
 
     test_accuracy = 100 * correct / total
     print(f'Final Test accuracy: {test_accuracy:.2f}%')
-
-    torch.save(model.state_dict(), 'models/CNN_dog_model.pth')
-    print(f'Model saved to models/dog_model.pth')
