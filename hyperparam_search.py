@@ -110,3 +110,43 @@ def train_one_lr(lr, train_loader, val_loader):
             break
 
     return best_val_acc, val_accs, best_state
+
+
+def main():
+    import matplotlib.pyplot as plt
+
+    train_loader, val_loader = get_loaders()
+    results = []
+
+    for lr in LR_VALUES:
+        print(f"\ntrying lr={lr}")
+        best_val, val_accs, best_state = train_one_lr(lr, train_loader, val_loader)
+        results.append((best_val, lr, val_accs, best_state))
+
+    results.sort(key=lambda x: x[0], reverse=True)
+
+    print("\n--- results ---")
+    for acc, lr, _, _ in results:
+        print(f"lr={lr}  best val acc: {acc:.2f}%")
+
+    best_acc, best_lr, _, best_state = results[0]
+    torch.save(best_state, "models/best_lr_search_CNN.pth")
+    print(f"\nbest lr: {best_lr}  val acc: {best_acc:.2f}%")
+    print("saved to models/best_lr_search_CNN.pth")
+
+    # plot val accuracy curves per LR
+    plt.figure(figsize=(8, 5))
+    for acc, lr, val_accs, _ in results:
+        plt.plot(range(1, len(val_accs) + 1), val_accs, label=f"lr={lr}")
+    plt.xlabel("epoch")
+    plt.ylabel("val accuracy (%)")
+    plt.title("LR search - val accuracy per epoch")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig("models/lr_search.png")
+    plt.show()
+    print("plot saved to models/lr_search.png")
+
+
+if __name__ == "__main__":
+    main()
