@@ -59,3 +59,54 @@ def get_loaders():
     train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True,  num_workers=4)
     val_loader   = DataLoader(val_ds,   batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
     return train_loader, val_loader
+
+
+def train_one_lr(lr, train_loader, val_loader):
+    model = Dog_Model(NUM_CLASSES).to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=WEIGHT_DECAY)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=3)
+
+    best_val_acc = 0.0
+    epochs_no_improve = 0
+    best_state = None
+    val_accs = []
+
+    for epoch in range(MAX_EPOCHS):
+        model.train()
+        for inputs, labels in train_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            l1_penalty = sum(p.abs().sum() for p in model.parameters())
+            loss = loss + L1_LAMBDA * l1_penalty
+            loss.backward()
+            optimizer.step()
+
+        model.eval()
+        correct = total = 0
+        with torch.no_grad():
+            for inputs, labels in val_loader:
+                inputs, labels = inputs.to(device), labels.to(device)
+                _, predicted = torch.max(model(inputs), 1)
+                total   += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
+        val_acc = 100 * correct / total
+        scheduler.step(val_acc)
+        val_accs.append(val_acc)
+        print(f"  lr={lr}  epoch {epoch+1}/{MAX_EPOCHS}  val acc: {val_acc:.2f}%")
+
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            best_state = copy.deepcopy(model.state_dict())
+            epochs_no_improve = 0
+        else:
+            epochs_no_improve += 1
+
+        if epochs_no_improve >= PATIENCE:
+            print(f"  early stop at epoch {epoch+1}")
+            break
+
+    return best_val_acc, val_accs, best_state
