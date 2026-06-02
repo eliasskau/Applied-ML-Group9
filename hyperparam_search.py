@@ -18,7 +18,7 @@ from dog_emotion.models.CNN_model import Dog_Model
 # data config
 DATA_DIR    = "data/images"
 IMG_SIZE    = 224
-NUM_CLASSES = 5
+NUM_CLASSES = 4
 BATCH_SIZE  = 32
 
 # search config
