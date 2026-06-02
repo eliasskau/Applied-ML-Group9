@@ -95,8 +95,8 @@ if __name__ == '__main__':
             outputs = model(inputs)
             loss = criterion(outputs, labels)
 
-            # L1 penalty on all weights
-            l1_penalty = sum(p.abs().sum() for p in model.parameters())
+            # L1 penalty on weights only (not biases or batchnorm params)
+            l1_penalty = sum(p.abs().sum() for name, p in model.named_parameters() if 'weight' in name and 'bn' not in name)
             loss = loss + l1_lambda * l1_penalty
 
             loss.backward()
