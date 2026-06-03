@@ -9,9 +9,10 @@ import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import train_test_split
 from torchvision.datasets import ImageFolder
 from dog_emotion.models.CNN_model import Dog_Model
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 
 SEED = 42
 torch.manual_seed(SEED)
@@ -58,11 +59,18 @@ test_transform = transforms.Compose([
 
 if __name__ == '__main__':
     full_dataset = ImageFolder(root=DATA_DIR, transform=train_transform)
+    labels = [s[1] for s in full_dataset.samples]
 
-    train_size = int(0.8 * len(full_dataset))
-    val_size = int(0.1 * len(full_dataset))
-    test_size = len(full_dataset) - train_size - val_size
-    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(full_dataset, [train_size, val_size, test_size])
+    # stratified split: preserves class distribution in each split
+    train_idx, temp_idx = train_test_split(
+        range(len(full_dataset)), test_size=0.2, stratify=labels, random_state=SEED)
+    temp_labels = [labels[i] for i in temp_idx]
+    val_idx, test_idx = train_test_split(
+        temp_idx, test_size=0.5, stratify=temp_labels, random_state=SEED)
+
+    train_dataset = Subset(full_dataset, train_idx)
+    val_dataset   = Subset(full_dataset, val_idx)
+    test_dataset  = Subset(full_dataset, test_idx)
 
     # Apply test transform (no augmentation) to val and test sets using deepcopy to avoid affecting train
     val_copy = copy.deepcopy(val_dataset.dataset)
