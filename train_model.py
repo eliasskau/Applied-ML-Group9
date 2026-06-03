@@ -7,6 +7,8 @@ import torchvision
 import torchvision.transforms as transforms
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
 from torchvision.datasets import ImageFolder
 from dog_emotion.models.CNN_model import Dog_Model
 from torch.utils.data import DataLoader
@@ -191,6 +193,19 @@ if __name__ == '__main__':
         mask = all_labels == i
         cls_acc = 100 * np.mean(all_preds[mask] == all_labels[mask]) if mask.sum() > 0 else 0.0
         print(f'  {cls}: {cls_acc:.2f}% ({mask.sum()} samples)')
+
+    # confusion matrix
+    cm = confusion_matrix(all_labels, all_preds)
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                xticklabels=classes, yticklabels=classes)
+    plt.xlabel('predicted')
+    plt.ylabel('actual')
+    plt.title('confusion matrix')
+    plt.tight_layout()
+    plt.savefig('models/confusion_matrix.png')
+    plt.show()
+    print('confusion matrix saved to models/confusion_matrix.png')
 
     # plot train vs val accuracy
     epochs_ran = range(1, len(history["train_acc"]) + 1)
