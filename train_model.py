@@ -27,7 +27,7 @@ num_classes = len(classes)
 
 
 # hyper param
-learning_rate= 0.0005
+learning_rate= 0.001
 num_epochs = 100
 batch_size = 32
 weight_decay = 1e-4   # L2 regularization
