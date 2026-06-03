@@ -185,6 +185,13 @@ if __name__ == '__main__':
     ci_high = np.percentile(bootstrap_accs, 97.5)
     print(f'95% confidence interval: ({ci_low:.2f}%, {ci_high:.2f}%)')
 
+    # per-class accuracy
+    print('\nPer-class accuracy:')
+    for i, cls in enumerate(classes):
+        mask = all_labels == i
+        cls_acc = 100 * np.mean(all_preds[mask] == all_labels[mask]) if mask.sum() > 0 else 0.0
+        print(f'  {cls}: {cls_acc:.2f}% ({mask.sum()} samples)')
+
     # plot train vs val accuracy
     epochs_ran = range(1, len(history["train_acc"]) + 1)
     plt.figure(figsize=(8, 5))
