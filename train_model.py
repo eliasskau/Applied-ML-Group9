@@ -13,6 +13,10 @@ from torchvision.datasets import ImageFolder
 from dog_emotion.models.CNN_model import Dog_Model
 from torch.utils.data import DataLoader
 
+SEED = 42
+torch.manual_seed(SEED)
+np.random.seed(SEED)
+
 # data
 
 DATA_DIR = "data/images"
