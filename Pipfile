@@ -13,9 +13,9 @@ pandas = "*"
 matplotlib = "*"
 tensorflow = "*"
 scikit-learn = "*"
-seaborn = "*"
 torch = "*"
 torchvision = "*"
+seaborn = "*"
 
 [dev-packages]
 
