@@ -90,7 +90,7 @@ if __name__ == '__main__':
     criterion = nn.CrossEntropyLoss()
     # weight_decay adds L2 penalty via the optimizer
     optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=3)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=5)
 
     best_val_acc = 0.0
     epochs_no_improve = 0
