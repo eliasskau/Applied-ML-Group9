@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -159,6 +160,30 @@ if __name__ == '__main__':
 
     test_accuracy = 100 * correct / total
     print(f'Final Test accuracy: {test_accuracy:.2f}%')
+
+    # bootstrap confidence interval on test accuracy
+    all_preds = []
+    all_labels = []
+    with torch.no_grad():
+        for inputs, labels in test_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            _, predicted = torch.max(model(inputs), 1)
+            all_preds.extend(predicted.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+
+    all_preds  = np.array(all_preds)
+    all_labels = np.array(all_labels)
+    n = len(all_labels)
+
+    bootstrap_accs = []
+    rng = np.random.default_rng(42)
+    for _ in range(1000):
+        idx = rng.integers(0, n, size=n)
+        bootstrap_accs.append(100 * np.mean(all_preds[idx] == all_labels[idx]))
+
+    ci_low  = np.percentile(bootstrap_accs, 2.5)
+    ci_high = np.percentile(bootstrap_accs, 97.5)
+    print(f'95% confidence interval: ({ci_low:.2f}%, {ci_high:.2f}%)')
 
     # plot train vs val accuracy
     epochs_ran = range(1, len(history["train_acc"]) + 1)
