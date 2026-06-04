@@ -8,7 +8,7 @@ import torchvision.transforms as transforms
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, f1_score, classification_report
 from sklearn.model_selection import train_test_split
 from torchvision.datasets import ImageFolder
 from dog_emotion.models.CNN_model import Dog_Model
@@ -213,6 +213,9 @@ if __name__ == '__main__':
         mask = all_labels == i
         cls_acc = 100 * np.mean(all_preds[mask] == all_labels[mask]) if mask.sum() > 0 else 0.0
         print(f'  {cls}: {cls_acc:.2f}% ({mask.sum()} samples)')
+
+    print('\nClassification report:')
+    print(classification_report(all_labels, all_preds, target_names=classes))
 
     # confusion matrix
     cm = confusion_matrix(all_labels, all_preds)
