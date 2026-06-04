@@ -49,3 +49,70 @@ Make sure you have the following software and tools installed:
 
 ---
 
+## Installation
+
+```bash
+git clone https://github.com/eliasskau/Applied-ML-Group9
+cd Applied-ML-Group9
+pip install pipenv
+pipenv install
+pipenv shell
+```
+
+Pull the dataset (requires DVC Google Drive access & json key file availible on request):
+```bash
+dvc pull
+```
+
+---
+
+## Training
+
+Train the CNN from scratch:
+```bash
+python train_model.py
+```
+
+This will:
+- Train for up to 100 epochs with early stopping (patience 7)
+- Save best weights to `models/best_CNN_dog_model.pth`
+- Output train/val accuracy plot to `models/train_val_accuracy.png`
+- Output confusion matrix to `models/confusion_matrix.png`
+- Print test accuracy with 95% bootstrap confidence interval
+
+Run learning rate search:
+```bash
+python hyperparam_search.py
+```
+
+---
+
+## Running the API
+
+```bash
+uvicorn api:app --reload --host 0.0.0.0 --port 8000
+```
+
+API will be available at `http://localhost:8000`  
+Interactive docs at `http://localhost:8000/docs`
+
+Example request:
+```bash
+curl -X POST http://localhost:8000/predict \
+     -H "accept: application/json" \
+     -F "file=@dog.jpg"
+```
+
+Example response:
+```json
+{
+  "predicted_emotion": "happy",
+  "confidence": 0.82,
+  "probabilities": {
+    "angry": 0.04,
+    "happy": 0.82,
+    "relaxed": 0.11,
+    "sad": 0.03
+  }
+}
+```
