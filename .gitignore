@@ -5,6 +5,7 @@ __pycache__/
 venv/
 .env
 example.ipynb
+notebooks/plot_results.ipynb
 .pth
 .pkl
 models/
