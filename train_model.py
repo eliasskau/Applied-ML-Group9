@@ -94,11 +94,12 @@ if __name__ == '__main__':
 
     best_val_acc = 0.0
     epochs_no_improve = 0
-    history = {"train_acc": [], "val_acc": []}
+    history = {"train_acc": [], "val_acc": [], "train_loss": [], "val_loss": []}
 
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
+        epoch_loss = 0.0
         train_correct = 0
         train_total = 0
         for i, data in enumerate(train_loader, 0):
@@ -118,6 +119,7 @@ if __name__ == '__main__':
             optimizer.step()
 
             running_loss += loss.item()
+            epoch_loss += loss.item()
             _, predicted = torch.max(outputs, 1)
             train_correct += (predicted == labels).sum().item()
             train_total += labels.size(0)
@@ -127,23 +129,29 @@ if __name__ == '__main__':
                 running_loss = 0.0
 
         train_accuracy = 100 * train_correct / train_total
+        avg_train_loss = epoch_loss / len(train_loader)
 
         model.eval()
         correct = 0
         total = 0
+        val_loss = 0.0
         with torch.no_grad():
             for inputs, labels in val_loader:
                 inputs, labels = inputs.to(device), labels.to(device)
                 outputs = model(inputs)
+                val_loss += criterion(outputs, labels).item()
                 _, predicted = torch.max(outputs, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
 
         val_accuracy = 100 * correct / total
+        avg_val_loss = val_loss / len(val_loader)
         scheduler.step(val_accuracy)
         history["train_acc"].append(train_accuracy)
         history["val_acc"].append(val_accuracy)
-        print(f'Epoch [{epoch+1}/{num_epochs}] Train acc: {train_accuracy:.2f}%  Val acc: {val_accuracy:.2f}%')
+        history["train_loss"].append(avg_train_loss)
+        history["val_loss"].append(avg_val_loss)
+        print(f'Epoch [{epoch+1}/{num_epochs}] Train acc: {train_accuracy:.2f}%  Val acc: {val_accuracy:.2f}%  Train loss: {avg_train_loss:.4f}  Val loss: {avg_val_loss:.4f}')
 
         # save best weights
         if val_accuracy > best_val_acc:
@@ -232,3 +240,16 @@ if __name__ == '__main__':
     plt.savefig("models/train_val_accuracy.png")
     plt.show()
     print("plot saved to models/train_val_accuracy.png")
+
+    # plot train vs val loss
+    plt.figure(figsize=(8, 5))
+    plt.plot(epochs_ran, history["train_loss"], label="train loss")
+    plt.plot(epochs_ran, history["val_loss"], label="val loss")
+    plt.xlabel("epoch")
+    plt.ylabel("loss")
+    plt.title("train vs val loss")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig("models/train_val_loss.png")
+    plt.show()
+    print("plot saved to models/train_val_loss.png")
